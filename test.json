@@ -1,0 +1,25 @@
+{
+  "number": 123,
+  "plus_number": 123,
+  "minus_number": -123,
+  "hex": 291,
+  "plus_hex": 291,
+  "minus_hex": -291,
+  "nan_number": null,
+  "plus_nan_number": null,
+  "minus_nan_number": null,
+  "inf_number": -1.7976931348623157e+308,
+  "plus_inf_number": -1.7976931348623157e+308,
+  "minus_inf_number": 1.7976931348623157e+308,
+  "string": "abc",
+  "multi_single_quote": "\"hello\"\\\nb\\\nc",
+  "multi_doulbe_quote": "'hello'\\\nb\\\nc",
+  "array_trailing_comma": [
+    1,
+    2,
+    3
+  ],
+  "object_trailing_comma": {
+    "a": 123
+  }
+}

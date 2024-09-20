@@ -1,0 +1,25 @@
+// commen
+/* comment */
+{
+    number: +123,
+    plus_number: +123,
+    minus_number: -123,
+    hex: 0x123,
+    plus_hex: +0x123,
+    minus_hex: -0x123,
+    nan_number: NaN,
+    plus_nan_number: +NaN,
+    minus_nan_number: -NaN,
+    inf_number: Infinity,
+    plus_inf_number: +Infinity,
+    minus_inf_number: -Infinity,
+    string: "abc",
+    multi_single_quote: '"hello"\
+b\
+c',
+    multi_doulbe_quote: "'hello'\
+b\
+c",
+    array_trailing_comma: [1,2,3],
+    object_trailing_comma: {a: 123,}
+}
