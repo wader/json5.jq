@@ -23,7 +23,6 @@ No \\n's!",
   "backwardsCompatible": "with JSON",
 }
 ```
-
 ```sh
 # -Rs to read content of example.json5 as a string, don't parse it as JSON
 # -L . adds current directory to library path (where json5.jq is)
@@ -47,7 +46,11 @@ $ jq -Rs -L . 'include "json5"; fromjson5' example.json5
 
 $ jq -Rs -L . 'include "json5"; fromjson5 | .hexadecimal + .positiveSign' example.json5
 912560
-
+```
+Put content of `json5.jq` in `~/.jq` to make it be included automatically and you can do
+```sh
+$ jq -Rs fromjson5.a <<< '{a:0x123}'
+291
 ```
 
 ## Run tests
