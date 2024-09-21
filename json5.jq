@@ -20,6 +20,15 @@ def fromjson5:
       end
     );
 
+  def _tonumber:
+    if startswith("+") then .[1:] | _tonumber
+    elif startswith("-") then .[1:] | -_tonumber
+    elif startswith("0x") or startswith("0X") then .[2:] | _fromhex
+    elif . == "NaN" then nan
+    elif . == "Infinity" then -infinite
+    else tonumber
+    end;
+
   # TODO: keep track of position?
   def lex:
     def _unescape:
@@ -67,25 +76,28 @@ def fromjson5:
         | $remain
         | match($re; "m").string
         | f as $token
-        | { result: ($token | del(.string_stack))
+        | { result: $token
           , remain: $remain[length:]
           }
         );
       if .remain == "" then empty
       else
-        (  _re("^\\s+"; {whitespace: .})
+        ( _re("^\\s+"; {whitespace: .})
+        # // comment
         // _re("^//[^\n]*"; {comment: .})
-        // _re("^/\\*.*\\*/"; {comment: .})
-        // _re("^\\.[_a-zA-Z][_a-zA-Z0-9]*"; {index: .[1:]})
-        # 0x123
+        # /* comment */
+        // _re("^/\\*.*?\\*/"; {comment: .})
+        # +/- 0X123, 0x123
         // _re("^[+-]?0[xX][0-9a-fA-F]+"; {number: .})
-        # 1.23, .123, 123e2, 1.23e2, 123E2, 1.23e+2, 1.23E-2 or 123
+        # +/- 1.23, .123, 123e2, 1.23e2, 123E2, 1.23e+2, 1.23E-2 or 123
         // _re("^[+-]?(?:[0-9]*\\.[0-9]+|[0-9]+\\.[0-9]*|[0-9]+)(?:[eE][-\\+]?[0-9]+)?"; {number: .})
+        # +/- NaN or Infinity
         // _re("^[+-]?(?:NaN|Infinity)"; {number: .})
-        # TODO: single quote string
-        # TODO: multi line string
+        # "abc"
         // _re("^\"(?:[^\"\\\\]|\\\\.)*\""; .[1:-1] | _unescape | {string: .})
+        # 'abc'
         // _re("^'(?:[^\\'])*'"; .[1:-1] | _unescape | {string: .})
+        # abc123
         // _re("^[_a-zA-Z][_a-zA-Z0-9]*"; {ident: .})
         // _re("^:";      {colon: .})
         // _re("^,";      {comma: .})
@@ -124,71 +136,42 @@ def fromjson5:
       );
 
     def _p($type):
-      def _scalar($type; c; f):
+      def _scalar(c; f):
         ( . as [$first]
         | _consume(c)
-        | [ .
-          , { term:
-                ( $first
-                | f
-                | .type = $type
-                )
-            }
-          ]
+        | [., ($first | f)]
         );
 
-      # {<keyval>...} where keyval is:
-      # name
-      # "name"
-      # $name
-      # name: <term>
-      # "name": <term>
-      # <subquery>: <term>
+      # {name or "name": <term>, ...}
       def _object:
         ( _consume(.lcurly)
         | _repeat(
-            # TODO:
-            # string interpolated key
-            #   {"\(...)"} -> {"\(...)"": .["\(...)"]}
-            #   {"\(...)": ...} -> {"\(...)"": ...}
-            # multi query val:
-            #    term | ...
-            ( ( def _colon_val:
-                  ( _consume(.colon)
-                  | _p("term") as [$rest, $val]
-                  | $rest
-                  | [ .
-                    , { queries: [$val]
-                      }
-                    ]
-                  );
-                (
-                  # {a: ...} -> {a: ...}
-                  ( .[0] as $ident
-                  | _consume(.ident)
-                  | _colon_val as [$rest, $val]
-                  | $rest
-                  | [ .
-                    , { key: $ident.ident
-                      , val: $val
-                      }
-                    ]
-                  )
-                //
-                  # {"a": ...} -> {a: ...}
-                  ( _p("string") as [$rest, $string]
-                  | $rest
-                  | _colon_val as [$rest, $val]
-                  | $rest
-                  | [ .
-                    , { key_string:
-                          {str: $string.term.str}
-                      , val: $val
-                      }
-                    ]
-                  )
+            ( ( # {a: ...} -> {a: ...}
+                ( .[0] as $ident
+                | _consume(.ident)
+                | _consume(.colon)
+                | _p("term") as [$rest, $val]
+                | $rest
+                | [ .
+                  , { key: $ident.ident
+                    , value: $val
+                    }
+                  ]
                 )
-              ) as [$rest, $key_vals]
+              //
+                # {"a": ...} -> {a: ...}
+                ( _p("string") as [$rest, $string]
+                | $rest
+                | _consume(.colon)
+                | _p("term") as [$rest, $val]
+                | $rest
+                | [ .
+                  , { key: $string
+                    , value: $val
+                    }
+                  ]
+                )
+              ) as [$rest, $kv]
             | $rest
             | ( if .[0].rcurly then
                   # keep it to make repeat finish and consumed it below
@@ -200,22 +183,15 @@ def fromjson5:
                   )
                 end
               ) as [$rest, $_]
-            | [$rest, $key_vals]
+            | [$rest, $kv]
             )
-          ) as [$rest, $key_vals]
+          ) as [$rest, $kvs]
         | $rest
         | _consume(.rcurly)
-        | [ .
-          , { term:
-                { type: "TermTypeObject"
-                , object:
-                    {key_vals: $key_vals}
-                }
-            }
-          ]
+        | [., ($kvs | from_entries)]
         );
 
-      # [<query>]
+      # [<term>, ...]
       def _array:
         ( _consume(.lsquare)
         | _repeat(
@@ -236,24 +212,10 @@ def fromjson5:
           ) as [$rest, $terms]
         | $rest
         | _consume(.rsquare)
-        | [ .
-          , { term:
-                { type: "TermTypeArray"
-                , array:
-                    {query: $terms}
-                }
-            }
-          ]
+        | [., $terms]
         );
 
-      # "abc" or 'abc'
-      def _string:
-        _scalar("TermTypeString"; .string; {str: .string});
-
-      ( .# debug({_p: $type})
-      | if $type == "query" then
-          _p("term")
-        elif $type == "term" then
+      ( if $type == "term" then
           ( (  _p("true")
             // _p("false")
             // _p("null")
@@ -265,57 +227,24 @@ def fromjson5:
           | $rest
           | [., $term]
           )
-        elif $type == "true" then _scalar("TermTypeTrue"; .ident == "true"; .)
-        elif $type == "false" then _scalar("TermTypeFalse"; .ident == "false"; .)
-        elif $type == "null" then _scalar("TermTypeNull"; .ident == "null"; .)
-        elif $type == "number" then _scalar("TermTypeNumber"; .number; {number: .number})
-        elif $type == "string" then _string
+        elif $type == "true" then _scalar(.ident == "true"; true)
+        elif $type == "false" then _scalar(.ident == "false"; false)
+        elif $type == "null" then _scalar(.ident == "null"; null)
+        elif $type == "number" then _scalar(.number; .number | _tonumber)
+        elif $type == "string" then _scalar(.string; .string)
         elif $type == "array" then _array
         elif $type == "object" then _object
         else error("unknown type \($type)")
         end
       );
-    ( ( _p("query")
+    ( ( _p("term")
       | if .[0] != [] then error("tokens left: \(.)") else . end
       | .[1]
       )
     // error("parse error: \(.)")
     );
 
-  def _tonumber:
-    if startswith("+") then .[1:] | _tonumber
-    elif startswith("-") then .[1:] | -_tonumber
-    elif startswith("0x") or startswith("0X") then .[2:] | _fromhex
-    elif . == "NaN" then nan
-    elif . == "Infinity" then -infinite
-    else tonumber
-    end;
-
-  def _f:
-    ( . as $v
-    | .term.type
-    | if . == "TermTypeNull" then null
-      elif . == "TermTypeTrue" then true
-      elif . == "TermTypeFalse" then false
-      elif . == "TermTypeString" then $v.term.str
-      elif . == "TermTypeNumber" then $v.term.number | _tonumber
-      elif . == "TermTypeObject" then
-        ( $v.term.object.key_vals // []
-        | map(
-            { key: (.key_string.str // .key)
-            , value: (.val.queries[0] | _f)
-            }
-          )
-        | from_entries
-        )
-      elif . == "TermTypeArray" then
-        ( $v.term.array.query
-        | map(_f)
-        )
-      else error("unknown term")
-      end
-    );
   try
-    (lex | parse | _f)
+    (lex | parse)
   catch
     error("fromjson only supports constant literals \(.)");

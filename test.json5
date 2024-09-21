@@ -1,5 +1,12 @@
-// commen
-/* comment */
+// comment
+ // comment
+/* comment
+   comment
+*/
+ /* comment
+    comment
+ */
+/* /* comment */
 {
     number: +123,
     plus_number: +123,
