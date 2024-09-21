@@ -108,10 +108,6 @@ def fromjson5:
 
   def parse:
     def _consume(f): select(.[0] | f) | .[1:];
-    def _optional(f):
-      ( f
-      // [., null]
-      );
     def _repeat(f):
       def _f:
         ( f as [$rest, $v]
@@ -126,7 +122,6 @@ def fromjson5:
         else [$c, []]
         end
       );
-    def _keyword($name): _consume(.ident == $name);
 
     def _p($type):
       def _scalar($type; c; f):
@@ -251,31 +246,13 @@ def fromjson5:
           ]
         );
 
-      # "abc"
-      def _string_simple:
-        _scalar("TermTypeString"; .string; {str: .string});
-
+      # "abc" or 'abc'
       def _string:
-        ( _string_simple
-        );
+        _scalar("TermTypeString"; .string; {str: .string});
 
       ( .# debug({_p: $type})
       | if $type == "query" then
-          # used by _op_prec_climb, exist to fix infinite recursion
-          # does not include infix operators
-          ( ( if length == 0 then
-                [ .
-                , { term:
-                      {type: "TermTypeIdentity"}
-                  }
-                ]
-              else
-                _p("term")
-              end
-            ) as [$rest, $query]
-          | $query
-          | [$rest, .]
-          )
+          _p("term")
         elif $type == "term" then
           ( (  _p("true")
             // _p("false")
