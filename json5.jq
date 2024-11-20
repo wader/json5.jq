@@ -25,7 +25,7 @@ def fromjson5:
     elif startswith("-") then .[1:] | -_tonumber
     elif startswith("0x") or startswith("0X") then .[2:] | _fromhex
     elif . == "NaN" then nan
-    elif . == "Infinity" then -infinite
+    elif . == "Infinity" then infinite
     else tonumber
     end;
 
