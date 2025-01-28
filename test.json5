@@ -28,5 +28,7 @@ c',
 b\
 c",
     array_trailing_comma: [1,2,3],
-    object_trailing_comma: {a: 123,}
+    object_trailing_comma: {a: 123,},
+    NaN: 1,
+    Infinity: 2,
 }

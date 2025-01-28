@@ -62,5 +62,5 @@ make test
 ## TODO
 - Cleanup jqjq remains
 - Line/column on error
-- Support `{NaN: 123}` etc. Lex `NaN`/`Infinite` and `+`/`-` as separate tokens and parse them?
+- Less hacky `{NaN: 123}` support
 - Verify supported whitespace. Now uses `\s` regexp

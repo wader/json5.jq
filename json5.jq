@@ -146,7 +146,7 @@ def fromjson5:
       def _object:
         ( _consume(.lcurly)
         | _repeat(
-            ( ( # {a: ...} -> {a: ...}
+            ( ( # {a: ...}
                 ( .[0] as $ident
                 | _consume(.ident)
                 | _consume(.colon)
@@ -159,7 +159,7 @@ def fromjson5:
                   ]
                 )
               //
-                # {"a": ...} -> {a: ...}
+                # {"a": ...}
                 ( _p("string") as [$rest, $string]
                 | $rest
                 | _consume(.colon)
@@ -167,6 +167,21 @@ def fromjson5:
                 | $rest
                 | [ .
                   , { key: $string
+                    , value: $val
+                    }
+                  ]
+                )
+              //
+                # Hack for:
+                # {NaN/Infinity: ...}
+                ( . as [{$number}]
+                | _consume(.number)
+                | select($number | . == "Infinity" or . == "NaN")
+                | _consume(.colon)
+                | _p("term") as [$rest, $val]
+                | $rest
+                | [ .
+                  , { key: $number
                     , value: $val
                     }
                   ]
