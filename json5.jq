@@ -35,6 +35,7 @@ def fromjson5:
       gsub(
         ( "(?<surrogate>(\\\\u[dD][89a-fA-F][0-9a-fA-F]{2}){2})|"
         + "(?<codepoint>\\\\u[0-9a-fA-F]{4})|"
+        + "(?<newline_escape>\\\\\n)|"
         + "(?<escape>\\\\.)"
         );
         if .surrogate then
@@ -52,6 +53,8 @@ def fromjson5:
           | [_fromhex]
           | implode
           )
+        elif .newline_escape then
+            ""
         elif .escape then
           # escape \n -> \n
           ( .escape[1:] as $escape

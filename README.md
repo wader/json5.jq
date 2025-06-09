@@ -8,7 +8,7 @@
 Code it mostly a stripped down and modified versionf of [jqjq](https://github.com/wader/jqjq).
 
 ## Usage
-```
+```sh
 $ cat example.json5
 {
   // comments
@@ -22,8 +22,7 @@ No \\n's!",
   trailingComma: 'in objects', andIn: ['arrays',],
   "backwardsCompatible": "with JSON",
 }
-```
-```sh
+
 # -Rs to read content of example.json5 as a string, don't parse it as JSON
 # -L . adds current directory to library path (where json5.jq is)
 # include "json5" to load json5.jq
@@ -32,7 +31,7 @@ $ jq -Rs -L . 'include "json5"; fromjson5' example.json5
 {
   "unquoted": "and you can quote me on that",
   "singleQuotes": "I can use \"double quotes\" here",
-  "lineBreaks": "Look, Mom! \\\nNo \\n's!",
+  "lineBreaks": "Look, Mom! No \\n's!",
   "hexadecimal": 912559,
   "leadingDecimalPoint": 0.8675309,
   "andTrailing": 8675309,

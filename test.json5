@@ -21,11 +21,15 @@
     plus_inf_number: +Infinity,
     minus_inf_number: -Infinity,
     string: "abc",
-    multi_single_quote: '"hello"\
-b\
+    string_empty: "",
+    string_multi_line: "'hello'
+ b 
+c",
+    string_single_quote_multi_line_escape: '"hello"\
+ b \
 c',
-    multi_double_quote: "'hello'\
-b\
+    string_double_quote_multi_line_escape: "'hello'\
+ b \
 c",
     array: [1,2,3],
     array_empty: [],

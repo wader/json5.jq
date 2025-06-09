@@ -12,8 +12,10 @@
   "plus_inf_number": 1.7976931348623157e+308,
   "minus_inf_number": -1.7976931348623157e+308,
   "string": "abc",
-  "multi_single_quote": "\"hello\"\\\nb\\\nc",
-  "multi_double_quote": "'hello'\\\nb\\\nc",
+  "string_empty": "",
+  "string_multi_line": "'hello'\n b \nc",
+  "string_single_quote_multi_line_escape": "\"hello\" b c",
+  "string_double_quote_multi_line_escape": "'hello' b c",
   "array": [
     1,
     2,
