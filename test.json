@@ -13,12 +13,23 @@
   "minus_inf_number": -1.7976931348623157e+308,
   "string": "abc",
   "multi_single_quote": "\"hello\"\\\nb\\\nc",
-  "multi_doulbe_quote": "'hello'\\\nb\\\nc",
+  "multi_double_quote": "'hello'\\\nb\\\nc",
+  "array": [
+    1,
+    2,
+    3
+  ],
+  "array_empty": [],
   "array_trailing_comma": [
     1,
     2,
     3
   ],
+  "object": {
+    "a": 123,
+    "b": 456
+  },
+  "object_empty": {},
   "object_trailing_comma": {
     "a": 123
   },
