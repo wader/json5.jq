@@ -77,6 +77,7 @@ def fromjson5:
             , "\"": "\""
             , "/": "/"
             , "\\": "\\"
+            , "'": "'"
             }[$escape]
           | if not then error("unknown escape: \\\($escape)") else . end
           )
@@ -88,7 +89,7 @@ def fromjson5:
       def _re($re; f):
         ( . as {$remain}
         | $remain
-        | match($re; "m").string
+        | match($re; "").string
         | f as $token
         | { result: $token
           , remain: $remain[length:]
@@ -100,7 +101,7 @@ def fromjson5:
         # // comment
         // _re("^//[^\n]*"; {comment: .})
         # /* comment */
-        // _re("^/\\*.*?\\*/"; {comment: .})
+        // _re("^/\\*(.|\n)*?\\*/"; {comment: .})
         # +/- 0X123, 0x123
         // _re("^[+-]?0[xX][0-9a-fA-F]+"; {number: .})
         # +/- 1.23, .123, 123e2, 1.23e2, 123E2, 1.23e+2, 1.23E-2 or 123
@@ -108,9 +109,9 @@ def fromjson5:
         # +/- NaN or Infinity
         // _re("^[+-]?(?:NaN|Infinity)"; {number: .})
         # "abc"
-        // _re("^\"(?:[^\"\\\\]|\\\\.)*\""; .[1:-1] | _unescape | {string: .})
+        // _re("^\"(?:\\\\\n|[^\"\\\\]|\\\\.)*?\""; .[1:-1] | _unescape | {string: .})
         # 'abc'
-        // _re("^'(?:[^\\'])*'"; .[1:-1] | _unescape | {string: .})
+        // _re("^'(?:\\\\\n|[^'\\\\]|\\\\.)*?'"; .[1:-1] | _unescape | {string: .})
         # abc123
         // _re("^[_a-zA-Z][_a-zA-Z0-9]*"; {ident: .})
         // _re("^:";      {colon: .})
@@ -276,4 +277,4 @@ def fromjson5:
   try
     (lex | parse)
   catch
-    error("fromjson only supports constant literals \(.)");
+    error("fromjson5 only supports constant literals: \(.)");
