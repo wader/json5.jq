@@ -35,6 +35,7 @@ def fromjson5:
       gsub(
         ( "(?<surrogate>(\\\\u[dD][89a-fA-F][0-9a-fA-F]{2}){2})|"
         + "(?<codepoint>\\\\u[0-9a-fA-F]{4})|"
+        + "(?<hex>\\\\x[0-9a-fA-F]{2})|"
         + "(?<newline_escape>\\\\\n)|"
         + "(?<escape>\\\\.)"
         );
@@ -50,6 +51,13 @@ def fromjson5:
         elif .codepoint then
           # codepoint \u006a -> j
           ( .codepoint[2:]
+          | [_fromhex]
+          | implode
+          )
+        elif .hex then
+          # codepoint \x61 -> a
+          # TODO: hex is a codepoint or raw byte?
+          ( .hex[2:]
           | [_fromhex]
           | implode
           )
