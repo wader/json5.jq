@@ -24,6 +24,9 @@ def fromjson5:
     if startswith("+") then .[1:] | _tonumber
     elif startswith("-") then .[1:] | -_tonumber
     elif startswith("0x") or startswith("0X") then .[2:] | _fromhex
+    # jaq tonumber throws on ".123" and "123."
+    elif startswith(".") then "0" + . | tonumber
+    elif endswith(".") then .[:-1] | tonumber
     elif . == "NaN" then nan
     elif . == "Infinity" then infinite
     else tonumber
@@ -114,8 +117,8 @@ def fromjson5:
         // _re("^,";      {comma: .})
         // _re("^\\[";    {lsquare: .})
         // _re("^\\]";    {rsquare: .})
-        // _re("^{";      {lcurly: .})
-        // _re("^}";      {rcurly: .})
+        // _re("^\\{";    {lcurly: .})
+        // _re("^\\}";    {rcurly: .})
         // error("unknown token: '\(.remain[0:100])'")
         )
       end;
