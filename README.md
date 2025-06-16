@@ -1,11 +1,16 @@
 # json5.jq
 
-[JSON5](https://json5.org) implementation for [jq](https://jqlang.github.io/jq/)
+[JSON5](https://json5.org) implementation for [jq](https://jqlang.github.io/jq/).
 
 > [!WARNING]  
-> This is mostly an experiment at the moment. Performance is probably horrible and error handling non-existing.
+> Performance is probably horrible and error handling non-existing.
 
-Code it mostly a stripped down and modified versionf of [jqjq](https://github.com/wader/jqjq).
+Code it mostly a stripped down and modified version of [jqjq](https://github.com/wader/jqjq).
+
+Compatible with
+[jq](https://jqlang.org/),
+[gojq](https://github.com/itchyny/gojq)
+and [jaq](https://github.com/01mf02/jaq).
 
 ## Usage
 ```sh
@@ -46,7 +51,7 @@ $ jq -Rs -L . 'include "json5"; fromjson5' example.json5
 $ jq -Rs -L . 'include "json5"; fromjson5 | .hexadecimal + .positiveSign' example.json5
 912560
 ```
-Put content of `json5.jq` in `~/.jq` to make it be included automatically and you can do
+Put content of `json5.jq` in `~/.jq` to make it be included automatically and you can do:
 ```sh
 $ jq -Rs fromjson5.a <<< '{a:0x123}'
 291
@@ -63,3 +68,9 @@ make test
 - Line/column on error
 - Less hacky `{NaN: 123}` support
 - Verify supported whitespace. Now uses `\s` regexp
+
+# Resources
+
+- https://spec.json5.org/
+- https://262.ecma-international.org/5.1/
+- https://github.com/json5/json5-tests
