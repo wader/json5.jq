@@ -38,5 +38,8 @@
     "a": 123
   },
   "NaN": 1,
-  "Infinity": 2
+  "Infinity": 2,
+  "$dollar": 1,
+  "$$dollar": 2,
+  "_underscore": 3
 }

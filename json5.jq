@@ -39,7 +39,7 @@ def fromjson5:
         ( "(?<surrogate>(\\\\u[dD][89a-fA-F][0-9a-fA-F]{2}){2})|"
         + "(?<codepoint>\\\\u[0-9a-fA-F]{4})|"
         + "(?<hex>\\\\x[0-9a-fA-F]{2})|"
-        + "(?<newline_escape>\\\\\n)|"
+        + "(?<newline_escape>\\\\\r?\n)|"
         + "(?<escape>\\\\.)"
         );
         if .surrogate then
@@ -99,9 +99,9 @@ def fromjson5:
       else
         ( _re("^\\s+"; {whitespace: .})
         # // comment
-        // _re("^//[^\n]*"; {comment: .})
+        // _re("^//.*"; {comment: .})
         # /* comment */
-        // _re("^/\\*(.|\n)*?\\*/"; {comment: .})
+        // _re("^/\\*(.|\n|\r)*?\\*/"; {comment: .})
         # +/- 0X123, 0x123
         // _re("^[+-]?0[xX][0-9a-fA-F]+"; {number: .})
         # +/- 1.23, .123, 123e2, 1.23e2, 123E2, 1.23e+2, 1.23E-2 or 123
@@ -109,11 +109,11 @@ def fromjson5:
         # +/- NaN or Infinity
         // _re("^[+-]?(?:NaN|Infinity)"; {number: .})
         # "abc"
-        // _re("^\"(?:\\\\\n|[^\"\\\\]|\\\\.)*?\""; .[1:-1] | _unescape | {string: .})
+        // _re("^\"(?:\\\\\r?\n|[^\"\\\\]|\\\\.)*?\""; .[1:-1] | _unescape | {string: .})
         # 'abc'
-        // _re("^'(?:\\\\\n|[^'\\\\]|\\\\.)*?'"; .[1:-1] | _unescape | {string: .})
-        # abc123
-        // _re("^[_a-zA-Z][_a-zA-Z0-9]*"; {ident: .})
+        // _re("^'(?:\\\\\r?\n|[^'\\\\]|\\\\.)*?'"; .[1:-1] | _unescape | {string: .})
+        # abc123 or $abc123
+        // _re("^[$_a-zA-Z][$_a-zA-Z0-9]*"; {ident: .})
         // _re("^:";      {colon: .})
         // _re("^,";      {comma: .})
         // _re("^\\[";    {lsquare: .})
