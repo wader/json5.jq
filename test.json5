@@ -34,7 +34,7 @@ c',
    string_double_quote_multi_line_escape: "\"double\" 'single' \
  b \
 c",
-   string_escape: "a\x61\u0061\u1234\uFFff\u0000\ud83d\udca9\uD83D\uDCA9",
+   string_escape: "a\x61\u0061\u1234\uFFff\u0000\ud83d\udca9\uD83D\uDCA9👍",
    array: [1,2,3],
    array_empty: [],
    array_trailing_comma: [1,2,3,],
