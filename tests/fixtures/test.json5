@@ -22,12 +22,6 @@
    minus_inf_number: -Infinity,
    string: "abc",
    string_empty: "",
-   string_single_multi_line: '"hello"
- b 
-c',
-   string_double_multi_line: "'hello'
- b 
-c",
    string_single_quote_multi_line_escape: '"double" \'single\' \
  b \
 c',
